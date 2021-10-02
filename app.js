@@ -1,4 +1,7 @@
 const { response } = require('express');
+
+const joi=require('@hapi/joi')
+
 const express= require('express');
 const app=express();
 
@@ -48,19 +51,36 @@ app.get('/api/user/:id',(req,res)=>{
 
 app.post('/api/users',(req, res)=>{
 
-    const user={
-        id: usuarios.length+1,
-        nombre: req.body.nombre
-    };
-    usuarios.push(user);
-    res.send(user);
+    // validacion de datos enviados 
+    const schema=joi.object({
+        nombre:joi.string()
+        .alphanum()
+        .min(3)
+        .max(100)
+        .required()
+    });
+
+    const {error,value}=schema.validate({nombre:req.body.nombre,});
+    if(!error){
+        const user={
+            id: usuarios.length+1,
+            nombre:value.nombre
+        };
+        usuarios.push(user);
+        res.send(user);
+    }else{
+        
+            const mensaje=error.details[0].message
+            res.status(400).send(mensaje);
+            
+        
+    }
+    
 
 });
 
-
 // app.put();//actualizacion
 // app.delete();//eliminacion
-
 
 // variable de entorno por si el puerto cambia al momento del deploy
 const port=process.env.PORT || 3000;
