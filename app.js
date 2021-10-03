@@ -19,8 +19,8 @@ const usuarios=[
 app.get('/',(req,res)=>{
     res.send('user: Darwing' );
 });
-app.get('/api/people',(req,res)=>{
-    res.send(['people','User','datos','resp']);
+app.get('/api/usuarios',(req,res)=>{
+    res.send(usuarios);
 });
 
 
@@ -38,10 +38,14 @@ app.get('/api/user/lista',(req,res)=>{
 
 //busqueda de usuarios por id
 app.get('/api/user/:id',(req,res)=>{
-    let user=usuarios.find(u=>
-        u.id===parseInt(req.params.id)
-    );
-    if(!user) res.status(404).send('el usuario no fue encontrado');
+    // llamando a funcion
+    let user=existeUser(req.params.id);
+
+
+    if(!user){
+        res.status(404).send('el usuario no fue encontrado');
+        return;
+    } 
     res.send(user);
     
 });
@@ -59,8 +63,10 @@ app.post('/api/users',(req, res)=>{
         .max(100)
         .required()
     });
+   //usando la funcion de validacion 
+    const {error,value}=schemaValidar(req.body.nombre);
 
-    const {error,value}=schema.validate({nombre:req.body.nombre,});
+    
     if(!error){
         const user={
             id: usuarios.length+1,
@@ -70,7 +76,7 @@ app.post('/api/users',(req, res)=>{
         res.send(user);
     }else{
         
-            const mensaje=error.details[0].message
+            const mensaje=error.details[0].message;
             res.status(400).send(mensaje);
             
         
@@ -80,7 +86,44 @@ app.post('/api/users',(req, res)=>{
 });
 
 // app.put();//actualizacion
+
+
+app.put('/api/usuario/:id',(req,res)=>{
+    //encontrar si existe el usuario
+
+    // let usuario=usuarios.find(u=>u.id===parseInt(req.params.id));
+    let usuario=existeUser(req.params.id);//funcion de busqueda
+    
+    if(!usuario) {
+        res.status(404).send('usuario no existe');
+        return;
+    }
+
+     //usando la funcion de validacion 
+    const {error,value}=schemaValidar(req.body.nombre);
+    if(error){
+        const mensaje=error.details[0].message;
+        res.status(400).send(mensaje);
+        return;
+    }
+    usuario.nombre=value.nombre;
+    res.send(usuario);
+})
 // app.delete();//eliminacion
+app.delete('/api/usuarios/:id',(req,res)=>{
+    let usuario=existeUser(req.params.id);
+
+    if(!usuario) {
+            res.status(404).send('usuario no existe');
+            return;
+    }
+    const index=usuarios.indexOf(usuario);
+    usuarios.splice(index,1);
+    res.send(usuarios);
+
+});
+
+
 
 // variable de entorno por si el puerto cambia al momento del deploy
 const port=process.env.PORT || 3000;
@@ -91,3 +134,19 @@ app.listen(port,()=>{
 
 
 });
+
+
+function existeUser(id){
+    return usuarios.find(u=>u.id===parseInt(id));
+}
+
+
+
+function schemaValidar(name){
+    const schema=joi.object({
+        nombre:joi.string().min(3).required(),
+  
+    });
+    return schema.validate({nombre:name});
+    
+}
