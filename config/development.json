@@ -1,0 +1,6 @@
+{
+    "nombre":"Nodejs Rest - desarrollo",
+    "configDB":{
+        "host":"prueba - db - server"
+        }
+}

@@ -1,0 +1,6 @@
+{
+    "nombre":"Nodejs Rest - produccion",
+    "configDB":{
+        "host":"db-production"
+        }
+}

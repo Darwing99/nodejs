@@ -1,13 +1,43 @@
-const { response } = require('express');
+const inicioDebug=require('debug')('app:inicio');
+const joi=require('@hapi/joi');
+const config=require('config');
 
-const joi=require('@hapi/joi')
+const dbDebug=require('debug')('app:database');
+const morgan=require('morgan');
 
 const express= require('express');
+const logger=require('./logger');
+
+
 const app=express();
 
 app.use(express.json());
 
+app.use(express.urlencoded({extended:true}))
 
+
+
+//configuacion de entornos
+
+// console.log('Application'+config.get('nombre'));
+// console.log('DB server ' +config.get('nombre'+config.get('configDB.host')));
+// para acceder a archivos estaticos
+app.use(express.static('public'));
+
+// app.use(logger);
+// app.use(function(req,res,next){
+//     console.log('Autenticando...');
+//     next();
+// })
+
+// //uso de middleware de terceros
+// if(app.get('env')==='development'){
+//     app.use(morgan('tiny'));
+//     inicioDebug('morgan habilitado')
+
+// }
+// // TRbajos db
+// dbDebug('conectando con la base de datos');
 
 const usuarios=[
     {id:1,nombre:'Darwing Hernandez'},
@@ -54,6 +84,14 @@ app.get('/api/user/:id',(req,res)=>{
 // app.post();//envio de datos
 
 app.post('/api/users',(req, res)=>{
+
+
+    // let body=req.body;
+    // console.log(body.nombre);
+    // res.json({
+    //     body
+    // })
+
 
     // validacion de datos enviados 
     const schema=joi.object({
